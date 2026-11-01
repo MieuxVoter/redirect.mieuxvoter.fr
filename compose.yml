@@ -1,0 +1,52 @@
+services:
+  nginx:
+    image: nginx:1-alpine
+    restart: unless-stopped
+    configs:
+      - source: redirect
+        target: /etc/nginx/conf.d/default.conf
+    ports:
+      - "${SERVICE_PORT:-80}:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_network"
+      - "traefik.http.services.subdomred.loadbalancer.server.port=${SERVICE_PORT:-80}"
+      - "traefik.http.routers.subdomred.entrypoints=websecure"
+
+      # FIXME: Let's test this out like this before going regex
+      - "traefik.http.routers.subdomred.rule=Host(`redirect.${BASE_DOMAIN:?define_me}`)"
+      - "traefik.http.routers.subdomred.rule=Host(`adhesion.${BASE_DOMAIN:?define_me}`)"
+      - "traefik.http.routers.subdomred.rule=Host(`don.${BASE_DOMAIN:?define_me}`)"
+
+      - "traefik.http.routers.subdomred.tls=true"
+      - "traefik.http.routers.subdomred.tls.certresolver=leresolver"
+
+
+configs:
+  redirect:
+    content: |
+      server {
+          server_name redirect.${BASE_DOMAIN:?define_it_in_env};
+          listen       80;
+          listen  [::]:80;
+          access_log off;
+          return 301 ${BASE_DOMAIN:?define_it_in_env};
+      }
+      server {
+          server_name adhesion.${BASE_DOMAIN:?define_it_in_env};
+          listen       80;
+          listen  [::]:80;
+          access_log off;
+          return 301 https://www.helloasso.com/associations/mieux-voter;
+      }
+      server {
+          server_name don.${BASE_DOMAIN:?define_it_in_env};
+          listen       80;
+          listen  [::]:80;
+          access_log off;
+          return 301 https://www.paypal.com/donate/?hosted_button_id=QD6U4D323WV4S;
+      }
+
+networks:
+  traefik_network:
+    external: true
