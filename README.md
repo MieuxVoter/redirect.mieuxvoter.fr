@@ -4,7 +4,7 @@
 [![Join the Discord chat at https://discord.mieuxvoter.fr](https://img.shields.io/discord/705322981102190593.svg?style=for-the-badge)](https://discord.mieuxvoter.fr)
 
 > [!WARNING]
-> Work in progress. Not usable yet.
+> This is tied to traefik, and requires it to be configured for docker.
 
 Sets up a bunch of 301 redirects on subdomains.
 
